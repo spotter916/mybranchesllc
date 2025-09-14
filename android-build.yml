@@ -1,0 +1,81 @@
+name: Build Android App Bundle
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'android/**'
+      - 'client/**'
+      - 'shared/**'
+      - 'package.json'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Verify project structure and build
+      run: |
+        echo "Current directory:"
+        pwd
+        echo "Project structure:"
+        ls -la
+        echo "Client directory:"
+        ls -la client/
+        echo "Checking client/index.html:"
+        ls -la client/index.html
+        echo "Node version:"
+        node --version
+        echo "NPM version:"
+        npm --version
+      
+    - name: Build web assets  
+      run: |
+        echo "Building web assets..."
+        npm run build
+      
+    - name: Sync Capacitor
+      run: |
+        npx cap sync android
+        npx cap copy android
+        
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
+    - name: Create keystore from secret
+      run: |
+        echo "${{ secrets.ANDROID_KEYSTORE_B64 }}" | base64 -d > android/app/upload.keystore
+        
+    - name: Build Android App Bundle
+      working-directory: android
+      env:
+        ANDROID_STORE_FILE: app/upload.keystore
+        ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+        ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      run: ./gradlew bundleRelease --no-daemon
+      
+    - name: Upload Android App Bundle
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-app-bundle-v2
+        path: android/app/build/outputs/bundle/release/app-release.aab
