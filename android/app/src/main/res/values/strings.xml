@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">My Branches</string>
+    <string name="title_activity_main">My Branches</string>
+    <string name="package_name">com.mybranchesllc.app</string>
+    <string name="custom_url_scheme">com.mybranchesllc.app</string>
+</resources>
