@@ -44,9 +44,9 @@ jobs:
       run: |
         echo "Building web assets..."
         echo "Looking for index.html..."
-        ls -la index.html || echo "index.html not found in root"
-        echo "Forcing Vite to build from root with explicit config override..."
-        npx vite build --config /dev/null --root . --outDir dist/public --emptyOutDir
+        ls -la index.html
+        echo "Building with Vite from current directory..."
+        npx vite build . --outDir dist/public --emptyOutDir
       
     - name: Sync Capacitor
       run: |
