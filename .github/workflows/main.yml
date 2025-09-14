@@ -43,10 +43,10 @@ jobs:
     - name: Build web assets  
       run: |
         echo "Building web assets..."
-        echo "Looking for index.html..."
-        ls -la index.html
-        echo "Building with Vite from root directory..."
-        npx vite build . --outDir dist/public --emptyOutDir
+        echo "Looking for client/index.html..."
+        ls -la client/index.html
+        echo "Building with Vite from client directory..."
+        npx vite build client --outDir dist/public --emptyOutDir
       
     - name: Sync Capacitor
       run: |
