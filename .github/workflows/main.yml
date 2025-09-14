@@ -6,7 +6,7 @@ on:
     branches: [ main ]
     paths:
       - 'android/**'
-      - 'client/**'
+      - 'src/**'
       - 'shared/**'
       - 'package.json'
 
@@ -27,16 +27,14 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
-    - name: Verify project structure and build
+    - name: Verify project structure
       run: |
         echo "Current directory:"
         pwd
         echo "Project structure:"
         ls -la
-        echo "Client directory:"
-        ls -la client/
-        echo "Checking client/index.html:"
-        ls -la client/index.html
+        echo "Source directory:"
+        ls -la src/
         echo "Node version:"
         node --version
         echo "NPM version:"
@@ -44,8 +42,8 @@ jobs:
       
     - name: Build web assets  
       run: |
-        echo "Building web assets with explicit CLI flags..."
-        npx vite build --root client --outDir ../dist/public --emptyOutDir
+        echo "Building web assets..."
+        npx vite build --outDir dist/public --emptyOutDir
       
     - name: Sync Capacitor
       run: |
@@ -63,13 +61,13 @@ jobs:
       
     - name: Create keystore from secret
       run: |
-        echo "${{ secrets.ANDROID_KEYSTORE_B64 }}" | base64 -d > android/app/upload.keystore
+        echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/upload.keystore
         
     - name: Build Android App Bundle
       working-directory: android
       env:
         ANDROID_STORE_FILE: app/upload.keystore
-        ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+        ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
       run: ./gradlew bundleRelease --no-daemon
